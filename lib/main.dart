@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:restofood_sqlite/ui/screens/home_screen.dart';
+import 'package:restofood_api/ui/screens/home_screen.dart';
 
 void main() => runApp(MyApp());
 

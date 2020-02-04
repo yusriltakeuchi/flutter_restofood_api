@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:restofood_sqlite/core/models/foods_mdl.dart';
-import 'package:restofood_sqlite/core/services/foods_services.dart';
-import 'package:restofood_sqlite/ui/widgets/custom_textfield.dart';
+import 'package:restofood_api/core/models/foods_mdl.dart';
+import 'package:restofood_api/core/services/food_services.dart';
+import 'package:restofood_api/core/utils/toast_utils.dart';
+import 'package:restofood_api/ui/widgets/custom_textfield.dart';
 
 class UpdateScreen extends StatelessWidget {
   FoodModel foodModel;
@@ -17,7 +19,7 @@ class UpdateScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Text("Update Food"),
+        title: Text("Update Food", style: TextStyle(color: Colors.white)),
       ),
       body: UpdateFood(
         foodModel: foodModel,
@@ -50,59 +52,29 @@ class _UpdateFoodState extends State<UpdateFood> {
     }
   }
 
-  void updateMakanan() async {
+  void updateFoods() async {
     if (titleController.text.isNotEmpty && descriptionController.text.isNotEmpty
-      && fullDescriptionController.text.isNotEmpty && priceController.text.isNotEmpty
+    && fullDescriptionController.text.isNotEmpty && priceController.text.isNotEmpty
+    && image != null
     ) {
-      FoodModel foodModel = FoodModel(
+       
+      var foodData = FoodModel(
         title: titleController.text,
         description: descriptionController.text,
         fullDescription: fullDescriptionController.text,
         price: int.parse(priceController.text),
-        image: image != null ? base64Encode(image.readAsBytesSync()) : widget.foodModel.image
+        imageFile: await MultipartFile.fromFile(image.path)
       );
 
-      var result = await FoodsServices.update(foodModel, widget.foodModel.id);
-
-      //Jika sukses insert
-      if (result) {
-        Fluttertoast.showToast(
-          msg: "Berhasil mengupdate makanan",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 1,
-          backgroundColor: Colors.black87,
-          textColor: Colors.white,
-          fontSize: 16.0
-        );
-
-        Future.delayed(Duration(
-          seconds: 1
-        ), () {
-          Navigator.pushNamedAndRemoveUntil(context, "/home", (Route<dynamic> routes) => false);
-        });
-        
+      FoodResponse response = await FoodServices.updateFood(foodData, widget.foodModel.id);
+      if (response.status == 200) {
+        ToastUtils.show(response.message);
+        Navigator.pushNamedAndRemoveUntil(context, "/home", (Route<dynamic> routes) => false);
       } else {
-        Fluttertoast.showToast(
-          msg: "Gagal mengupdate makanan",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 1,
-          backgroundColor: Colors.black87,
-          textColor: Colors.white,
-          fontSize: 16.0
-        );
+        ToastUtils.show(response.message);
       }
     } else {
-      Fluttertoast.showToast(
-        msg: "Silahkan isi semua bagian",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIos: 1,
-        backgroundColor: Colors.black87,
-        textColor: Colors.white,
-        fontSize: 16.0
-      );
+      ToastUtils.show("Silahkan isi semua field");
     }
   }
 
@@ -175,7 +147,7 @@ class _UpdateFoodState extends State<UpdateFood> {
             height: 40,
             width: MediaQuery.of(context).size.width,
             child: RaisedButton(
-              onPressed: () => updateMakanan(),
+              onPressed: () => updateFoods(),
               color: Colors.orange,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8)

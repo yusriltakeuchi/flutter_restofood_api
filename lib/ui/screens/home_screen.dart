@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:restofood_sqlite/core/models/foods_mdl.dart';
-import 'package:restofood_sqlite/core/services/foods_services.dart';
-import 'package:restofood_sqlite/ui/screens/add_screen.dart';
-import 'package:restofood_sqlite/ui/screens/detail_screen.dart';
+import 'package:restofood_api/core/models/foods_mdl.dart';
+import 'package:restofood_api/core/services/food_services.dart';
+import 'package:restofood_api/ui/screens/add_screen.dart';
+import 'package:restofood_api/ui/screens/detail_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -12,7 +12,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Text("Restofood"),
+        title: Text("Restofood", style: TextStyle(color: Colors.white)),
         leading: Icon(Icons.fastfood, color: Colors.white,),
         actions: <Widget>[
           Padding(
@@ -71,9 +71,8 @@ class _ListFoodState extends State<ListFood> {
   //Instance data foods
   List<FoodModel> foods;
 
-  //Function load data
   void loadData() async {
-    var _foods = await FoodsServices.getAll();
+    var _foods = foods = await FoodServices.getAll();
     setState(() {
       foods = _foods;
     });
@@ -90,7 +89,6 @@ class _ListFoodState extends State<ListFood> {
     if (foods == null) {
       return Center(
         child: CircularProgressIndicator(
-          backgroundColor: Colors.orange,
         ),
       );
     }
@@ -119,12 +117,12 @@ class _ListFoodState extends State<ListFood> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
 
-                      //Bagian ini tambahkan image, title dan description
+                      //Bagian ini tambahkan image
                       Container(
                         width: 64,
                         height: 64,
-                        child: Image.memory(
-                          base64Decode(foods[index].image),
+                        child: Image.network(
+                          foods[index].image,
                           fit: BoxFit.cover,
                         ),
                       ),

@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:restofood_sqlite/core/models/foods_mdl.dart';
-import 'package:restofood_sqlite/core/services/foods_services.dart';
-import 'package:restofood_sqlite/ui/widgets/custom_textfield.dart';
+import 'package:restofood_api/core/models/foods_mdl.dart';
+import 'package:restofood_api/core/services/food_services.dart';
+import 'package:restofood_api/core/utils/toast_utils.dart';
+import 'package:restofood_api/ui/widgets/custom_textfield.dart';
 
 class AddScreen extends StatelessWidget {
   @override
@@ -14,7 +16,7 @@ class AddScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Text("Add Food"),
+        title: Text("Add Food", style: TextStyle(color: Colors.white)),
       ),
       body: AddBody(),
     );
@@ -30,7 +32,7 @@ class _AddBodyState extends State<AddBody> {
   File image;
   var titleController = TextEditingController();
   var descriptionController = TextEditingController();
-  var fullDescriptionControlelr = TextEditingController();
+  var fullDescriptionController = TextEditingController();
   var priceController = TextEditingController();
 
   void imagePick() async {
@@ -42,62 +44,36 @@ class _AddBodyState extends State<AddBody> {
     }
   }
 
-  void addMakanan() async {
+  void createFoods() async {
     if (titleController.text.isNotEmpty && descriptionController.text.isNotEmpty
-      && fullDescriptionControlelr.text.isNotEmpty && priceController.text.isNotEmpty
-      && image != null
+    && fullDescriptionController.text.isNotEmpty && priceController.text.isNotEmpty
+    && image != null
     ) {
-      FoodModel foodModel = FoodModel(
+      var foodData = FoodModel(
         title: titleController.text,
         description: descriptionController.text,
-        fullDescription: fullDescriptionControlelr.text,
+        fullDescription: fullDescriptionController.text,
         price: int.parse(priceController.text),
-        image: base64Encode(image.readAsBytesSync())
+        imageFile: await MultipartFile.fromFile(image.path)
       );
 
-      var result = await FoodsServices.create(foodModel);
-
-      //Jika sukses insert
-      if (result) {
-        Fluttertoast.showToast(
-          msg: "Berhasil menambah makanan",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 1,
-          backgroundColor: Colors.black87,
-          textColor: Colors.white,
-          fontSize: 16.0
-        );
-
+      ToastUtils.show("Membuat makanan");
+      FoodResponse response = await FoodServices.createFood(foodData);
+      if (response.status == 200) {
+        ToastUtils.show(response.message);
         Future.delayed(Duration(
           seconds: 1
         ), () {
           Navigator.pushNamedAndRemoveUntil(context, "/home", (Route<dynamic> routes) => false);
         });
-        
       } else {
-        Fluttertoast.showToast(
-          msg: "Gagal menambah makanan",
-          toastLength: Toast.LENGTH_SHORT,
-          gravity: ToastGravity.CENTER,
-          timeInSecForIos: 1,
-          backgroundColor: Colors.black87,
-          textColor: Colors.white,
-          fontSize: 16.0
-        );
+        ToastUtils.show(response.message);
       }
     } else {
-      Fluttertoast.showToast(
-        msg: "Silahkan isi semua bagian",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.CENTER,
-        timeInSecForIos: 1,
-        backgroundColor: Colors.black87,
-        textColor: Colors.white,
-        fontSize: 16.0
-      );
+        ToastUtils.show("Silahkan isi semua field");
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -137,7 +113,7 @@ class _AddBodyState extends State<AddBody> {
           CustomTextField(
             action: TextInputAction.done,
             type: TextInputType.multiline,
-            controller: fullDescriptionControlelr,
+            controller: fullDescriptionController,
             hintText: "Full Deskripsi",
           ),
 
@@ -154,7 +130,7 @@ class _AddBodyState extends State<AddBody> {
             height: 40,
             width: MediaQuery.of(context).size.width,
             child: RaisedButton(
-              onPressed: () => addMakanan(),
+              onPressed: () => createFoods(),
               color: Colors.orange,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8)

@@ -2,31 +2,27 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:restofood_sqlite/core/models/foods_mdl.dart';
-import 'package:restofood_sqlite/core/services/foods_services.dart';
-import 'package:restofood_sqlite/ui/screens/update_screen.dart';
+import 'package:restofood_api/core/models/foods_mdl.dart';
+import 'package:restofood_api/core/services/food_services.dart';
+import 'package:restofood_api/core/utils/toast_utils.dart';
+import 'package:restofood_api/ui/screens/update_screen.dart';
 
 class DetailScreen extends StatelessWidget {
   FoodModel foodModel;
   DetailScreen({this.foodModel});
 
-  void deleteFood(BuildContext context) async {
-    await FoodsServices.delete(foodModel);
-    Fluttertoast.showToast(
-      msg: "Berhasil menghapus makanan",
-      toastLength: Toast.LENGTH_SHORT,
-      gravity: ToastGravity.CENTER,
-      timeInSecForIos: 1,
-      backgroundColor: Colors.black87,
-      textColor: Colors.white,
-      fontSize: 16.0
-    );
-
-    Future.delayed(Duration(
-      seconds: 1
-    ), () {
-      Navigator.pushNamedAndRemoveUntil(context, "/home", (Route<dynamic> routes) => false);
-    });
+  void deleteFoods(BuildContext context) async {
+    FoodResponse response = await FoodServices.deleteFood(foodModel.id);
+    if (response.status == 200) {
+        ToastUtils.show(response.message);
+        Future.delayed(Duration(
+          seconds: 1
+        ), () {
+          Navigator.pushNamedAndRemoveUntil(context, "/home", (Route<dynamic> routes) => false);
+        });
+      } else {
+        ToastUtils.show(response.message);
+      }
   }
   
   @override
@@ -34,7 +30,7 @@ class DetailScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.orange,
-        title: Text(foodModel.title),
+        title: Text(foodModel.title, style: TextStyle(color: Colors.white)),
         actions: <Widget>[
           Padding(
             padding: EdgeInsets.only(right: 20),
@@ -51,7 +47,7 @@ class DetailScreen extends StatelessWidget {
           Padding(
             padding: EdgeInsets.only(right: 20),
             child: InkWell(
-              onTap: () => deleteFood(context),
+              onTap: () => deleteFoods(context),
               child: Icon(Icons.delete, color: Colors.white,)
             ),
           ),
@@ -80,8 +76,8 @@ class DetailBody extends StatelessWidget {
                 borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(15.0),
                     bottomRight: Radius.circular(15.0)),
-                child: Image.memory(
-                base64Decode(foodModel.image),
+                child: Image.network(
+                foodModel.image,
                   width: double.infinity,
                   height: MediaQuery.of(context).size.width / 2,
                   fit: BoxFit.cover,
