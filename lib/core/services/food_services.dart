@@ -22,6 +22,8 @@ class FoodServices {
       _foodData.add(FoodModel.fromJson(value));
     });
 
+    print(_foodData[0].title);
+
     return _foodData;
   }
 

@@ -69,7 +69,7 @@ class _UpdateFoodState extends State<UpdateFood> {
       FoodResponse response = await FoodServices.updateFood(foodData, widget.foodModel.id);
       if (response.status == 200) {
         ToastUtils.show(response.message);
-        Navigator.pushNamedAndRemoveUntil(context, "/home", (Route<dynamic> routes) => false);
+        Navigator.pushNamedAndRemoveUntil(context, "/dashboard", (Route<dynamic> routes) => false);
       } else {
         ToastUtils.show(response.message);
       }

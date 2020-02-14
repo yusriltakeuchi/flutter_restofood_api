@@ -64,7 +64,7 @@ class _AddBodyState extends State<AddBody> {
         Future.delayed(Duration(
           seconds: 1
         ), () {
-          Navigator.pushNamedAndRemoveUntil(context, "/home", (Route<dynamic> routes) => false);
+          Navigator.pushNamedAndRemoveUntil(context, "/dashboard", (Route<dynamic> routes) => false);
         });
       } else {
         ToastUtils.show(response.message);
