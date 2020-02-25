@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:restofood_api/core/utils/toast_utils.dart';
 import 'package:restofood_api/ui/screens/home_screen.dart';
+import 'package:restofood_api/ui/screens/register_screen.dart';
 import 'package:restofood_api/ui/widgets/input_field.dart';
 import 'package:restofood_api/ui/widgets/primary_button.dart';
 
@@ -91,6 +92,18 @@ class LoginBody extends StatelessWidget {
                   color: Colors.orange,
                   text: "LOGIN",
                   onClick: () => login(context),
+                ),
+              ),
+              SizedBox(height: 10),
+              InkWell(
+                onTap: () => Navigator.push(context, MaterialPageRoute(
+                  builder: (context) => RegisterScreen()
+                )),
+                child: Text(
+                  "Belum punya akun? Daftar Sekarang!",
+                  style: TextStyle(
+                    fontSize: 14, color: Colors.black87
+                  ),
                 ),
               )
             ],
